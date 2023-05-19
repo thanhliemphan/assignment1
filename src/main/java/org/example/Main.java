@@ -1,19 +1,95 @@
 package org.example;
 
-// Press Shift twice to open the Search Everywhere dialog and type `show whitespaces`,
-// then press Enter. You can now see whitespace characters in your code.
+import config.SpringConfig;
+import entity.CustomerEntity;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import repository.CustomerRepository;
+
+import java.time.LocalDate;
+import java.util.List;
+
 public class Main {
+    static ApplicationContext context = new AnnotationConfigApplicationContext(SpringConfig.class);
+    static CustomerRepository customerRepository = (CustomerRepository) context.getBean("customerRepository");
     public static void main(String[] args) {
-        // Press Alt+Enter with your caret at the highlighted text to see how
-        // IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+//        createNewCustomer();
+//        listAllCustomer();
+//        findCustomerById(2);
+//        findCustomerByName("Liemm");
+//        findCustomerByPhoneOrEmail("09058818000","thanhliemphan@gmail.com");
+        findCustomerBySexAndYearsOldBetween("male",20,30);
+    }
+    private static void createNewCustomer(){
+        CustomerEntity customerEntity = new CustomerEntity();
 
-        // Press Shift+F10 or click the green arrow button in the gutter to run the code.
-        for (int i = 1; i <= 5; i++) {
+        customerEntity.setName("Liem");
+        customerEntity.setBirthDay(LocalDate.parse("1997-08-16"));
+        customerEntity.setSex("Male");
+        customerEntity.setEmail("thanhliemphan97@gmail.com");
+        customerEntity.setPhone("0905881800");
+        customerEntity.setAddress("218,Ton Duc Thang,Da Nang");
 
-            // Press Shift+F9 to start debugging your code. We have set one breakpoint
-            // for you, but you can always add more by pressing Ctrl+F8.
-            System.out.println("i = " + i);
+        CustomerEntity result = customerRepository.save(customerEntity);
+        if (result != null){
+            System.out.println("A new customer saved successfully,customer ID = "+customerEntity.getId());
+        }
+    }
+    private static void listAllCustomer(){
+        List<CustomerEntity> customerEntities = (List<CustomerEntity>) customerRepository.findAll();
+        System.out.println("Found " + customerEntities.size() + " customer in the table book");
+        System.out.println("They are: ");
+        for (CustomerEntity customer:customerEntities) {
+            System.out.println(customer.toString());
+        }
+    }
+    private static void findCustomerById(int customerID){
+        if (customerRepository.existsById(customerID) == true){
+            CustomerEntity customerEntity = customerRepository.findById(customerID).get();
+            System.out.println("Found a customer with book ID = " + customerID);
+            System.out.println(customerEntity.toString());
+        } else {
+            System.out.println("Not found any customer with book ID = " + customerID);
+        }
+    }
+    private static void findCustomerByName(String name){
+        List<CustomerEntity> customerEntities = customerRepository.findByName(name);
+        if (customerEntities.size()!=0) {
+            System.out.println("Found " + customerEntities.size() + " customer(s) have name is " + name);
+            System.out.println("They are:");
+            for (CustomerEntity customer:customerEntities) {
+                System.out.println(customer.toString());
+            }
+        } else {
+            System.out.println("Not found any customer have name is " + name);
+        }
+    }
+    private static void findCustomerByPhoneOrEmail(String phone,String email){
+        List<CustomerEntity> customerEntityList = customerRepository.findByPhoneOrEmail(phone,email);
+        if (customerEntityList.size()!=0) {
+            System.out.println("Found " + customerEntityList.size() + " customer(s) have phone is " + phone + " or email is " + email);
+            System.out.println("They are:");
+            for (CustomerEntity customer:customerEntityList) {
+                System.out.println(customer.toString());
+            }
+        }
+        else{
+            System.out.println("Not found any customer have phone is " + phone + " or email is " + email);
+        }
+    }
+    private static void findCustomerBySexAndYearsOldBetween(String sex, int startAge, int endAge){
+        LocalDate currentDate = LocalDate.now();
+        LocalDate startDate = currentDate.minusYears(endAge);
+        LocalDate endDate = currentDate.minusYears(startAge);
+        List<CustomerEntity> customerEntityList = customerRepository.findBySexAndBirthDayBetween(sex,startDate,endDate);
+        if (customerEntityList.size()!=0){
+            System.out.println("Found " + customerEntityList.size() + " customer(s) have sex is " + sex + " and years old from " + startAge + " to " + endAge);
+            System.out.println("They are:");
+            for (CustomerEntity customer:customerEntityList) {
+                System.out.println(customer.toString());
+            }
+        } else {
+            System.out.println("Not found any customer have sex is " + sex + " and years old from " + startAge + " to " + endAge);
         }
     }
 }
